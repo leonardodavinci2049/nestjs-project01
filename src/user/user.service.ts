@@ -5,7 +5,7 @@ import { UpdateUserNameEmailDto } from './dto/update-name-email';
 import { UpdatePathUserDto } from './dto/update-patch-user.dto';
 
 @Injectable()
-export class UsersService {
+export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create({
