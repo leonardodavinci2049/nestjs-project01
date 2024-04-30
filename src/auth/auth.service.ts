@@ -9,6 +9,10 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+  async createToken() {}
+
+  async checkToken() {}
+
   /*  
  async validateUser(username: string, password: string): Promise<any> {
     const user = await this.userService.findByUsername(username);
