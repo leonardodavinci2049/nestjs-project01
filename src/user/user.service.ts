@@ -52,7 +52,7 @@ export class UserService {
     return this.prisma.tbl_system_usuario.findMany({
       where: {
         EMAIL_DE_LOGIN: {
-          contains: 'gmail',
+          contains: '@',
         },
       },
       take: 10,

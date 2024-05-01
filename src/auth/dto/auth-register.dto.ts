@@ -1,4 +1,10 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateUserDto } from '../../user/dto/create-user.dto';
+import { IsEmail, IsString, IsStrongPassword } from 'class-validator';
 
-export class AuthRegisterDto extends PartialType(CreateUserDto) {}
+export class AuthRegisterDto {
+  @IsEmail({}, { message: 'Invalid email' })
+  EMAIL_DE_LOGIN: string;
+
+  @IsString({ message: 'Interior must be a valid string', each: true })
+  @IsStrongPassword({ minLength: 6 }, { message: 'Password is too weak' })
+  SENHA: string;
+}

@@ -12,8 +12,9 @@ import {
 import { UserService } from './user.service';
 
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserNameEmailDto } from './dto/update-name-email';
+
 import { ParamId } from 'src/core/decorators/param-id.decorator';
+import { UpdateUserEmailDto } from './dto/update-email.dto ';
 
 @Controller('user')
 export class UserController {
@@ -38,7 +39,7 @@ export class UserController {
 
   @Put(':id')
   async update(
-    @Body() data: UpdateUserNameEmailDto,
+    @Body() data: UpdateUserEmailDto,
     @Param('id', ParseIntPipe) id: number,
   ) {
     return this.userService.update(id, data);
@@ -46,7 +47,7 @@ export class UserController {
 
   @Patch('/partial/:id')
   async updatePartial(
-    @Body() data: UpdateUserNameEmailDto,
+    @Body() data: UpdateUserEmailDto,
     @Param('id', ParseIntPipe) id: number,
   ) {
     return this.userService.updatePartial(id, data);
