@@ -7,6 +7,7 @@ import { UpdatePathUserDto } from './dto/update-patch-user.dto';
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
+  const 
 
   async create({
     ID_SYSTEM_CFG_CLIENTE,
@@ -41,7 +42,8 @@ export class UserService {
       },
       select: {
         ID_USUARIO_SYSTEM: true,
-        NOME: true,
+        ID_SYSTEM_CFG_CLIENTE: true,
+        NOME: true,     
         EMAIL_DE_LOGIN: true,
         DATADOCADASTRO: true,
       },

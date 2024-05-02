@@ -9,7 +9,7 @@ export class CreateUserDto {
   @IsEmail({}, { message: 'Invalid email' })
   EMAIL_DE_LOGIN: string;
   @IsStrongPassword({ minLength: 6 }, { message: 'Password is too weak' })
-  SENHA: string;
+  SENHA?: string;
 
   DATADOCADASTRO?: Date;
   DT_UPDATE?: Date;

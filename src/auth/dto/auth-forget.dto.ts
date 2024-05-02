@@ -2,5 +2,5 @@ import { IsEmail } from 'class-validator';
 
 export class AuthForGetDto {
   @IsEmail({}, { message: 'Invalid email' })
-  email: string;
+  EMAIL_DE_LOGIN: string;
 }

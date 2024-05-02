@@ -1,10 +1,14 @@
-import { IsEmail, IsString, IsStrongPassword } from 'class-validator';
+import { IsEmail} from "class-validator";
 
 export class AuthRegisterDto {
-  @IsEmail({}, { message: 'Invalid email' })
-  EMAIL_DE_LOGIN: string;
-
-  @IsString({ message: 'Interior must be a valid string', each: true })
-  @IsStrongPassword({ minLength: 6 }, { message: 'Password is too weak' })
-  SENHA: string;
-}
+    ID_SYSTEM_CFG_CLIENTE?: number;
+    ID_USUARIO_SYSTEM?: number;
+    ID_PESSOA?: number;
+    LOGIN?: string;
+    NOME?: string;
+  
+    @IsEmail({}, { message: 'Invalid email' })
+    EMAIL_DE_LOGIN: string;
+    SENHA?: string;
+  }
+  

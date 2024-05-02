@@ -1,44 +1,83 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/core/prisma/prisma.service';
+import { UserService } from 'src/user/user.service';
+import * as bcrypt from 'bcrypt';
+import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { AuthRegisterDto } from './dto/auth-register.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly userService: UserService,
   ) {}
 
-  async createToken() {}
+  createToken(user: AuthRegisterDto) {
+    return {
+      accessToken: this.jwtService.sign({
+          id: user.ID_USUARIO_SYSTEM,
+          ID_SYSTEM: user.ID_SYSTEM_CFG_CLIENTE,
+          name: user.NOME,
+          password: user.SENHA,
+          email: user.EMAIL_DE_LOGIN
+      }, {
+          expiresIn: "7 days",
+          subject: user.ID_USUARIO_SYSTEM.toString(),
+          issuer: 'https://www.localhost.com',
+          audience: 'users',
+      })
+  }
+}
 
-  async checkToken() {}
 
-  /*  
- async validateUser(username: string, password: string): Promise<any> {
-    const user = await this.userService.findByUsername(username);
-    if (user && user.password === password) {
-      const { password, ...result } = user;
-      return result;
-    }
-    return null;
-  } */
 
-  async login(email: string, password: string): Promise<any> {
+checkToken(token: string) {
+  try {
+      const data = this.jwtService.verify(token, {
+          issuer: 'https://www.localhost.com',
+          audience:  'users',
+      });
+
+      return data;
+  } catch (e) {
+      throw new BadRequestException(e);
+  }
+}
+
+
+isValidToken(token: string) {
+  try {
+      this.checkToken(token);
+      return true;
+  } catch (e) {
+      return false;
+  }
+}
+
+  async login(login: string, email: string, password: string) {
     const user = await this.prisma.tbl_system_usuario.findFirst({
       where: {
-        EMAIL_DE_LOGIN: email,
+        LOGIN: login,
         SENHA: password,
       },
     });
 
     if (!user) {
-      throw new UnauthorizedException('Email e/ou senha incorreto');
-    }
-
-    return true;
+      throw new UnauthorizedException('E-mail e/ou senha incorretos.');
   }
 
-  async forget(email: string): Promise<any> {
+/*   if (!await bcrypt.compare(password, user.SENHA)) {
+      throw new UnauthorizedException('E-mail e/ou senha incorretos.');
+  } */
+
+  return user;
+  //return this.createToken(user);
+
+  }
+
+  async forget(email: string){
     const user = await this.prisma.tbl_system_usuario.findFirst({
       where: {
         EMAIL_DE_LOGIN: email,
@@ -48,21 +87,75 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Email incorreto');
     }
-    return true;
+
+  /*   
+    const token = this.jwtService.sign({
+      id: user.ID_SYSTEM_CFG_CLIENTE
+  }, {
+      expiresIn: "30 minutes",
+      subject: String(user.ID_SYSTEM_CFG_CLIENTE),
+      issuer: 'forget',
+      audience: 'users',
+  }); */
+/* 
+  await this.mailer.sendMail({
+      subject: 'Recuperação de Senha',
+      to: 'joao@hcode.com.br',
+      template: 'forget',
+      context: {
+          name: user.name,
+          token
+      }
+  }); */
+
+  return true;
   }
 
-  async reset(id: number, token: string): Promise<any> {
+  async reset(password: string, token: string) {
     // To do: implementar a verificação do token
+    try {
+          const data:any = this.jwtService.verify(token, {
+            issuer: 'forget',
+            audience: 'users',
+        });
 
-    await this.prisma.tbl_system_usuario.update({
+        if (isNaN(Number(data.id))) {
+          throw new BadRequestException("Token é inválido.");
+      }
+
+        const salt = await bcrypt.genSalt();
+        password = await bcrypt.hash(password, salt);
+
+        const userPasswordReset = await this.prisma.tbl_system_usuario.update({
+          where: {
+            ID_USUARIO_SYSTEM: Number(data.id),
+          },
+          data: {
+            SENHA: password,
+          },
+        });
+          return this.createToken(userPasswordReset);
+      
+    } catch (e) {
+      throw new BadRequestException(e);
+  }
+
+}
+
+  async register(useRegister: AuthRegisterDto) {
+
+    const user = await this.userService.create(useRegister);
+
+    return this.createToken(user);
+
+}
+
+
+  async validateUser(payload: any) {
+    return await this.prisma.tbl_system_usuario.findFirst({
       where: {
-        ID_USUARIO_SYSTEM: id,
-      },
-      data: {
-        SENHA: token,
+        ID_USUARIO_SYSTEM: payload.id,
       },
     });
-
-    return true;
-  }
+  }a
 }
