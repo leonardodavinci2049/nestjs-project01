@@ -16,8 +16,10 @@ export class UserService {
     NOME,
     EMAIL_DE_LOGIN,
     SENHA,
+    ROLE,
     DATADOCADASTRO,
     DT_UPDATE,
+
   }: CreateUserDto) {
     const offset = new Date().getTimezoneOffset() * 60000;
     const localDate = new Date(Date.now() - offset);
@@ -37,13 +39,16 @@ export class UserService {
         NOME,
         EMAIL_DE_LOGIN,
         SENHA,
+        ROLE,
         DATADOCADASTRO,
         DT_UPDATE,
+
       },
       select: {
         ID_USUARIO_SYSTEM: true,
         ID_SYSTEM_CFG_CLIENTE: true,
-        NOME: true,     
+        NOME: true,  
+        ROLE: true,   
         EMAIL_DE_LOGIN: true,
         DATADOCADASTRO: true,
       },

@@ -8,6 +8,8 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 
@@ -15,16 +17,25 @@ import { CreateUserDto } from './dto/create-user.dto';
 
 import { ParamId } from 'src/core/decorators/param-id.decorator';
 import { UpdateUserEmailDto } from './dto/update-email.dto ';
+import { Roles } from 'src/core/decorators/roles.decorator';
+import { Role } from 'src/core/enums/role.enum';
+import { LogInterceptor } from 'src/core/interceptors/log.interceptors';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
+import { RoleGuard } from 'src/auth/guards/role.guard';
 
-@Controller('user')
+@UseGuards(JwtAuthGuard, RoleGuard)
+@UseInterceptors(LogInterceptor)
+@Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
+  
+ 
   @Post()
   create(@Body() data: CreateUserDto) {
     // console.log({ email, password });
     return this.userService.create(data);
   }
+
 
   @Get()
   findAll() {
@@ -70,6 +81,8 @@ export class UserController {
     };
   }
   */
+
+
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.userService.remove(+id);

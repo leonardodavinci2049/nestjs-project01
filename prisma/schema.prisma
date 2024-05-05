@@ -241,6 +241,7 @@ model tbl_system_cfg_geral {
   INATIVO       Int?      @default(0)
   DT_EXPORTE    DateTime? @db.DateTime(0)
   DT_UPDATE     DateTime? @db.DateTime(0)
+  DT_CREATED    DateTime? @db.DateTime(0)
 }
 
 model tbl_system_cliente {
@@ -480,6 +481,8 @@ model tbl_system_usuario {
   FLAG_SEX              Int?      @default(1) @db.SmallInt
   FLAG_SAB              Int?      @default(1) @db.SmallInt
   FLAG_DOM              Int?      @default(1) @db.SmallInt
+  ROLE                  Int?      @default(1) @db.SmallInt
+  TOKEN                 String?   @db.VarChar(100)
 
   @@index([ID_SYSTEM_CFG_CLIENTE], map: "tbl_system_usuario_ID_SYSTEM_CFG_CLIENTE_IDX")
   @@index([LOGIN], map: "tbl_system_usuario_LOGIN_IDX")

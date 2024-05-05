@@ -9,6 +9,7 @@ import { AuthRegisterDto } from './dto/auth-register.dto';
 import { JwtAuthGuard } from './guards/jwt.auth.guard';
 import { User } from 'src/core/decorators/user.decorator';
 
+
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -33,12 +34,12 @@ export class AuthController {
 
   }
 
-
-
+  
   @Post('register')
   async register(@Body() data: AuthRegisterDto) {
     return this.authService.register(data);
   }
+
 
   @Post('forget')
   async forget(@Body() body: AuthForGetDto) {

@@ -9,7 +9,8 @@ export class JwtAuthGuard implements CanActivate {
 
     constructor(
         private readonly authService: AuthService,
-        private readonly userService: UserService) { }
+        private readonly userService: UserService
+    ) {}
 
     async canActivate(
         context: ExecutionContext,

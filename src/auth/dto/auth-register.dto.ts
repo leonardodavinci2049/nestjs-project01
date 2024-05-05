@@ -1,4 +1,5 @@
-import { IsEmail, IsNumber, IsString } from "class-validator";
+import { IsEmail, IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
+import { Role } from "src/core/enums/role.enum";
 
 export class AuthRegisterDto {
      @IsNumber()
@@ -15,6 +16,10 @@ export class AuthRegisterDto {
     @IsEmail({}, { message: 'Invalid email' })
     EMAIL_DE_LOGIN: string;
     @IsString({ message: 'Interior must be a valid string', each: true })
-    SENHA?: string;
+    SENHA?: string; 
+
+    @IsOptional()
+    @IsEnum(Role)
+    ROLE?: number;
   }
   
