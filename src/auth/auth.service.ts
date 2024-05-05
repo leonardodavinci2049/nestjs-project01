@@ -8,6 +8,10 @@ import { AuthRegisterDto } from './dto/auth-register.dto';
 
 @Injectable()
 export class AuthService {
+
+  private issuer = 'https://www.localhost.com';
+  private audience = 'users';
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
@@ -16,35 +20,33 @@ export class AuthService {
 
   createToken(user: AuthRegisterDto) {
     return {
-      accessToken: this.jwtService.sign({
+      accessToken: this.jwtService.sign({ //Payload
           id: user.ID_USUARIO_SYSTEM,
           ID_SYSTEM: user.ID_SYSTEM_CFG_CLIENTE,
-          name: user.NOME,
-          password: user.SENHA,
-          email: user.EMAIL_DE_LOGIN
-      }, {
+          name: user.NOME,       
+      }, {//options
           expiresIn: "7 days",
           subject: user.ID_USUARIO_SYSTEM.toString(),
-          issuer: 'https://www.localhost.com',
-          audience: 'users',
+          issuer: this.issuer,
+          audience: this.audience,
       })
   }
 }
 
 
 
-checkToken(token: string) {
-  try {
-      const data = this.jwtService.verify(token, {
-          issuer: 'https://www.localhost.com',
-          audience:  'users',
-      });
+  checkToken(token: string) {
+    try {
+        const data = this.jwtService.verify(token, {
+            issuer: this.issuer,
+            audience:  this.audience,
+        });
 
-      return data;
-  } catch (e) {
-      throw new BadRequestException(e);
+        return data;
+    } catch (e) {
+        throw new BadRequestException(e);
+    }
   }
-}
 
 
 isValidToken(token: string) {
@@ -56,23 +58,23 @@ isValidToken(token: string) {
   }
 }
 
-  async login(login: string, email: string, password: string) {
-    const user = await this.prisma.tbl_system_usuario.findFirst({
+async login(login: string, email: string, password: string) {
+    const userLogin = await this.prisma.tbl_system_usuario.findFirst({
       where: {
         LOGIN: login,
         SENHA: password,
       },
     });
 
-    if (!user) {
-      throw new UnauthorizedException('E-mail e/ou senha incorretos.');
+    if (!userLogin) {
+      throw new UnauthorizedException('Login e/ou Senha Incorretos.');
   }
 
 /*   if (!await bcrypt.compare(password, user.SENHA)) {
       throw new UnauthorizedException('E-mail e/ou senha incorretos.');
   } */
 
-  return user;
+  return this.createToken(userLogin);
   //return this.createToken(user);
 
   }
@@ -157,5 +159,5 @@ isValidToken(token: string) {
         ID_USUARIO_SYSTEM: payload.id,
       },
     });
-  }a
+  }
 }

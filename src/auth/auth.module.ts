@@ -8,13 +8,13 @@ import { UserModule } from 'src/user/user.module';
 @Module({
   imports: [ 
     JwtModule.register({
-      secret: '(YJ&+mYaWuLvrB&4)oIJR-Xf##LnzM8M2ltf&sSdH)',
+      secret: process.env.JWT_SECRET
     }),
     UserModule,
     PrismaModule,
   ],
   controllers: [AuthController],
   providers: [AuthService],
-  exports: [AuthService]
+  exports: []
 })
 export class AuthModule {}
