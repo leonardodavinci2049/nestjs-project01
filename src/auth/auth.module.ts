@@ -6,15 +6,15 @@ import { AuthService } from './auth.service';
 import { UserModule } from 'src/user/user.module';
 
 @Module({
-  imports: [ 
+  imports: [
     JwtModule.register({
-      secret: process.env.JWT_SECRET
+      secret: process.env.JWT_SECRET,
     }),
     forwardRef(() => UserModule),
-    PrismaModule
+    PrismaModule,
   ],
   controllers: [AuthController],
   providers: [AuthService],
-  exports: [AuthService]
+  exports: [AuthService],
 })
 export class AuthModule {}

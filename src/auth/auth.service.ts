@@ -8,8 +8,7 @@ import { AuthRegisterDto } from './dto/auth-register.dto';
 
 @Injectable()
 export class AuthService {
-
-  private issuer = 'https://www.localhost.com';
+  private issuer = 'http://localhost.com';
   private audience = 'users';
 
   constructor(
@@ -20,45 +19,68 @@ export class AuthService {
 
   createToken(user: AuthRegisterDto) {
     return {
-      accessToken: this.jwtService.sign({ //Payload
+      accessToken: this.jwtService.sign(
+        {
+          //Payload
           id: user.ID_USUARIO_SYSTEM,
           ID_SYSTEM: user.ID_SYSTEM_CFG_CLIENTE,
-          name: user.NOME,       
-      }, {//options
-          expiresIn: "7 days",
+          name: user.NOME,
+        },
+        {
+          //options
+          expiresIn: '7 days',
           subject: user.ID_USUARIO_SYSTEM.toString(),
           issuer: this.issuer,
           audience: this.audience,
-      })
+        },
+      ),
+    };
   }
-}
-
 
 
   checkToken(token: string) {
     try {
-        const data = this.jwtService.verify(token, {
-            issuer: this.issuer,
-            audience:  this.audience,
-        });
+      const data = this.jwtService.verify(token, {
+        issuer: this.issuer, //verifica se o token foi emitido pelo servidor
+        audience: this.audience, // verifica se o token é para o usuário
+      });
 
-        return data;
+      return data;
     } catch (e) {
-        throw new BadRequestException(e);
+      throw new BadRequestException(e);
     }
   }
 
 
-isValidToken(token: string) {
-  try {
+
+  isValidToken(token: string) { // rota que válida o token
+    try {
       this.checkToken(token);
       return true;
-  } catch (e) {
+    } catch (e) {
       return false;
+    }
   }
-}
+ 
 
-async login(login: string, email: string, password: string) {
+  
+
+  async validateUser(payload: any) {
+    return await this.prisma.tbl_system_usuario.findFirst({
+      where: {
+        ID_USUARIO_SYSTEM: payload.id,
+      },
+    });
+  }
+
+  async register(useRegister: AuthRegisterDto) {
+    const user = await this.userService.create(useRegister);
+
+    return this.createToken(user);
+  }
+
+
+  async login(login: string, email: string, password: string) {
     const userLogin = await this.prisma.tbl_system_usuario.findFirst({
       where: {
         LOGIN: login,
@@ -68,18 +90,17 @@ async login(login: string, email: string, password: string) {
 
     if (!userLogin) {
       throw new UnauthorizedException('Login e/ou Senha Incorretos.');
-  }
+    }
 
-/*   if (!await bcrypt.compare(password, user.SENHA)) {
+    /*   if (!await bcrypt.compare(password, user.SENHA)) {
       throw new UnauthorizedException('E-mail e/ou senha incorretos.');
   } */
 
-  return this.createToken(userLogin);
-  //return this.createToken(user);
-
+    return this.createToken(userLogin);
+    //return this.createToken(user);
   }
 
-  async forget(email: string){
+  async forget(email: string) {
     const user = await this.prisma.tbl_system_usuario.findFirst({
       where: {
         EMAIL_DE_LOGIN: email,
@@ -90,7 +111,7 @@ async login(login: string, email: string, password: string) {
       throw new UnauthorizedException('Email incorreto');
     }
 
-  /*   
+    /*   
     const token = this.jwtService.sign({
       id: user.ID_SYSTEM_CFG_CLIENTE
   }, {
@@ -99,7 +120,7 @@ async login(login: string, email: string, password: string) {
       issuer: 'forget',
       audience: 'users',
   }); */
-/* 
+    /* 
   await this.mailer.sendMail({
       subject: 'Recuperação de Senha',
       to: 'joao@hcode.com.br',
@@ -110,54 +131,37 @@ async login(login: string, email: string, password: string) {
       }
   }); */
 
-  return true;
+    return true;
   }
 
   async reset(password: string, token: string) {
     // To do: implementar a verificação do token
     try {
-          const data:any = this.jwtService.verify(token, {
-            issuer: 'forget',
-            audience: 'users',
-        });
+      const data: any = this.jwtService.verify(token, {
+        issuer: 'forget',
+        audience: 'users',
+      });
 
-        if (isNaN(Number(data.id))) {
-          throw new BadRequestException("Token é inválido.");
+      if (isNaN(Number(data.id))) {
+        throw new BadRequestException('Token é inválido.');
       }
 
-        const salt = await bcrypt.genSalt();
-        password = await bcrypt.hash(password, salt);
+      const salt = await bcrypt.genSalt();
+      password = await bcrypt.hash(password, salt);
 
-        const userPasswordReset = await this.prisma.tbl_system_usuario.update({
-          where: {
-            ID_USUARIO_SYSTEM: Number(data.id),
-          },
-          data: {
-            SENHA: password,
-          },
-        });
-          return this.createToken(userPasswordReset);
-      
+      const userPasswordReset = await this.prisma.tbl_system_usuario.update({
+        where: {
+          ID_USUARIO_SYSTEM: Number(data.id),
+        },
+        data: {
+          SENHA: password,
+        },
+      });
+      return this.createToken(userPasswordReset);
     } catch (e) {
       throw new BadRequestException(e);
+    }
   }
 
-}
-
-  async register(useRegister: AuthRegisterDto) {
-
-    const user = await this.userService.create(useRegister);
-
-    return this.createToken(user);
-
-}
-
-
-  async validateUser(payload: any) {
-    return await this.prisma.tbl_system_usuario.findFirst({
-      where: {
-        ID_USUARIO_SYSTEM: payload.id,
-      },
-    });
-  }
+ 
 }

@@ -7,7 +7,7 @@ import { UpdatePathUserDto } from './dto/update-patch-user.dto';
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
-  const 
+  const;
 
   async create({
     ID_SYSTEM_CFG_CLIENTE,
@@ -19,7 +19,6 @@ export class UserService {
     ROLE,
     DATADOCADASTRO,
     DT_UPDATE,
-
   }: CreateUserDto) {
     const offset = new Date().getTimezoneOffset() * 60000;
     const localDate = new Date(Date.now() - offset);
@@ -42,13 +41,12 @@ export class UserService {
         ROLE,
         DATADOCADASTRO,
         DT_UPDATE,
-
       },
       select: {
         ID_USUARIO_SYSTEM: true,
         ID_SYSTEM_CFG_CLIENTE: true,
-        NOME: true,  
-        ROLE: true,   
+        NOME: true,
+        ROLE: true,
         EMAIL_DE_LOGIN: true,
         DATADOCADASTRO: true,
       },
@@ -109,10 +107,7 @@ export class UserService {
     });
   }
 
-  async updatePartial(
-    id: number,
-    { NOME, LOGIN, EMAIL_DE_LOGIN }: UpdatePathUserDto,
-  ) {
+  async updatePartial(id: number, { NOME, LOGIN, EMAIL_DE_LOGIN }: UpdatePathUserDto) {
     await this.userExists(id);
 
     if (NOME == null || NOME == '') {
