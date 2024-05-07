@@ -78,8 +78,12 @@ export class UserService {
 
   async findOne(id: number) {
     //there is the option to use findFirst or findMany but findUnique is more performant
+
+    //console.log('id2: ' + id);
     await this.userExists(id);
 
+
+    //console.log('id3: ' + id);
     return this.prisma.tbl_system_usuario.findUnique({
       where: {
         ID_USUARIO_SYSTEM: id,
@@ -89,7 +93,8 @@ export class UserService {
         ID_SYSTEM_CFG_CLIENTE: true,
         ID_PESSOA: true,
         LOGIN: true,
-        NOME: true,
+        NOME: true,  
+        ROLE: true,  
         EMAIL_DE_LOGIN: true,
         SENHA: true,
       },

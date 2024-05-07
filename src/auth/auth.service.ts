@@ -9,7 +9,7 @@ import { AuthRegisterDto } from './dto/auth-register.dto';
 @Injectable()
 export class AuthService {
   private issuer = 'http://localhost.com';
-  private audience = 'users';
+  private audience = 'user';
 
   constructor(
     private readonly prisma: PrismaService,
@@ -25,6 +25,7 @@ export class AuthService {
           id: user.ID_USUARIO_SYSTEM,
           ID_SYSTEM: user.ID_SYSTEM_CFG_CLIENTE,
           name: user.NOME,
+          role: user.ROLE,
         },
         {
           //options
@@ -138,8 +139,8 @@ export class AuthService {
     // To do: implementar a verificação do token
     try {
       const data: any = this.jwtService.verify(token, {
-        issuer: 'forget',
-        audience: 'users',
+        issuer: this.issuer, 
+        audience: this.audience, 
       });
 
       if (isNaN(Number(data.id))) {
