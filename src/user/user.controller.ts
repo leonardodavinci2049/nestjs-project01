@@ -22,16 +22,16 @@ import { Role } from 'src/core/enums/role.enum';
 import { LogInterceptor } from 'src/core/interceptors/log.interceptors';
 import { JwtAuthGuard } from 'src/core/guards/jwt.auth.guard';
 import { RoleGuard } from 'src/core/guards/role.guard';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 
 //@UseInterceptors(LogInterceptor)
 @Roles(Role.Admin)
-@UseGuards(JwtAuthGuard, RoleGuard) // a ordem dos guards importa
+@UseGuards( JwtAuthGuard, RoleGuard) // a ordem dos guards importa
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
- 
-  @Roles(Role.Admin, Role.User) 
+
   @Post()
   create(@Body() data: CreateUserDto) {
     // console.log({ email, password });

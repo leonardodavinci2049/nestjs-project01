@@ -16,6 +16,14 @@ async function bootstrap() {
       },
     }),
   );
+  app.enableCors(
+    {
+      origin: '*',
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+      allowedHeaders: 'Content-Type, Accept',
+    },
+  
+  );
   app.useGlobalInterceptors(new LogInterceptor());
 
   await app.listen(3000);

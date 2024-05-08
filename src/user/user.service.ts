@@ -3,6 +3,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { PrismaService } from 'src/core/prisma/prisma.service';
 import { UpdateUserNameEmailDto } from './dto/update-name-email';
 import { UpdatePathUserDto } from './dto/update-patch-user.dto';
+//import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -20,6 +22,36 @@ export class UserService {
     DATADOCADASTRO,
     DT_UPDATE,
   }: CreateUserDto) {
+
+  
+    if (EMAIL_DE_LOGIN == null || EMAIL_DE_LOGIN == '') {
+      throw new NotFoundException('O email é obrigatório.');
+    }
+
+    if (SENHA == null || SENHA == '') {
+      throw new NotFoundException('A senha é obrigatória.');
+    }
+
+    if (NOME == null || NOME == '') {
+      throw new NotFoundException('O nome é obrigatório.');
+    }
+
+   // console.log('SENHA: ' + SENHA);
+
+    try {
+
+     //   const salt = await bcrypt.genSalt(10);
+
+      //  console.log('salt: ' + salt);
+
+      SENHA = await bcrypt.hash(SENHA, 10);
+      
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
+  
+
+
     const offset = new Date().getTimezoneOffset() * 60000;
     const localDate = new Date(Date.now() - offset);
 
@@ -103,6 +135,9 @@ export class UserService {
 
   async update(id: number, data: UpdateUserNameEmailDto) {
     await this.userExists(id);
+
+   // data.SENHA = await bcrypt.hash(SENHA, 10);
+
 
     return this.prisma.tbl_system_usuario.update({
       where: {
