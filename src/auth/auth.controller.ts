@@ -1,4 +1,4 @@
-import { Body, Controller, Headers, Post, Req, UseGuards } from '@nestjs/common';
+import {  BadRequestException, Body, Controller, FileTypeValidator, MaxFileSizeValidator, ParseFilePipe, Post, Req, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthLoginDto } from './dto/auth-login.dto';
 
 import { AuthResetDto } from './dto/auth-reset.dto';
@@ -8,10 +8,18 @@ import { AuthService } from './auth.service';
 import { AuthRegisterDto } from './dto/auth-register.dto';
 import { JwtAuthGuard } from '../core/guards/jwt.auth.guard';
 import { User } from 'src/core/decorators/user.decorator';
+import {  FileFieldsInterceptor, FileInterceptor, FilesInterceptor} from '@nestjs/platform-express';
+import {join} from 'path';
+import { FileServiceV2 } from "src/file/file.service";
+import { writeFile } from 'fs';
+
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+              private readonly authService: AuthService,
+              private readonly fileServiceV2: FileServiceV2
+            ) {}
 
   @Post('login')
   async login(@Body() { LOGIN, EMAIL_DE_LOGIN, SENHA }: AuthLoginDto) {
@@ -50,5 +58,93 @@ export class AuthController {
     return { message: 'Token Success', data1: Req.tokenPayload, data2: user };
   }
 
+
+  @UseInterceptors(FileInterceptor('file'))
+  @UseGuards(JwtAuthGuard)
+  @Post('photov1')
+  async uploadPhoto( @User('ID_USUARIO_SYSTEM') user , @UploadedFile() photo: Express.Multer.File) {
+
+   // console.log(join(__dirname, '..', '..','src', 'core', 'storage', 'photos', `photo-${photo.originalname}`));
+  
+    try {
+
+      const photoPath = join(__dirname, '..', '..','src', 'core', 'storage', 'photos', `photo-${user}-${photo.originalname}`);
+       const result = writeFile(photoPath, photo.buffer, error => {
+        if (!error) {
+          console.log(`Translated to`);
+        }
+      }); 
+      return { message: 'Sucesso no upload de arquivo', data1: user};
+     // return {photo };
+      
+    } catch (e) {
+      return { message: e.message };
+    //  throw new BadRequestException(e);
+    }
+   // src/core/storage/photos/teste.js
+
+    
+   // 
+  }
+
+  @UseInterceptors(FileInterceptor('file'))
+  @UseGuards(JwtAuthGuard)
+  @Post('photov2')
+  async uploadPhotov2(
+      @User() user,
+      @UploadedFile(new ParseFilePipe({
+          validators: [
+              new FileTypeValidator({fileType:'image/png'}), // somente typo imagem png
+              new MaxFileSizeValidator({maxSize: 1024 * 50}), // em bayte
+          ]
+      })) photo: Express.Multer.File
+  ) {
+
+    const photoPath = join(__dirname, '..', '..','src', 'core', 'storage', 'photos', `photo-${user}-${photo.originalname}`);
+      
+      try {
+       await this.fileServiceV2.upload(photo, photoPath);
+      } catch (e) {
+          throw new BadRequestException(e)
+      }
+
+      return {photo};
+  }
+
+
+
+  @UseInterceptors(FilesInterceptor('files'))
+  @UseGuards(JwtAuthGuard)
+  @Post('files')
+  async uploadFiles( @User('ID_USUARIO_SYSTEM') user , @UploadedFiles() files: Express.Multer.File[]) {
+
+   // console.log(join(__dirname, '..', '..','src', 'core', 'storage', 'photos', `photo-${photo.originalname}`));
+  
+    try {
+      return {files}
+    } catch (e) {
+      return { message: e.message };
+    //  throw new BadRequestException(e);
+    }
+   // src/core/storage/photos/teste.js
+
+    
+   // 
+  }
+
+  @UseInterceptors(FileFieldsInterceptor([{
+    name: 'photo',
+    maxCount: 1
+}, {
+    name: 'documents',
+    maxCount: 10
+}]))
+
+
+@UseGuards(JwtAuthGuard)
+@Post('files-fields')
+async uploadFilesFields(@User() user, @UploadedFiles() files: {photo: Express.Multer.File, documents: Express.Multer.File[]}) {
+    return files;
+}
 
 }
